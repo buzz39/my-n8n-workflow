@@ -1,0 +1,424 @@
+{
+  "name": "RAG-Example",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1Vy4AeD1upt2EKXBABaWYBTaR-14RsY8C",
+          "mode": "list",
+          "cachedResultName": "RAG",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1Vy4AeD1upt2EKXBABaWYBTaR-14RsY8C"
+        },
+        "event": "watchFolderUpdated"
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "413168c7-88d8-4fdc-a249-fb686fb48d8a",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "NWdp6Ncyq88phNZd",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "=https://drive.google.com/file/d/1MCQUOxM95IUWwpYdHziRf_0IIJAQoCSQ/view?usp=drive_link",
+          "mode": "url"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        220,
+        0
+      ],
+      "id": "d2d58fc1-4a58-4279-acc8-942dfb01e40e",
+      "name": "Google Drive",
+      "alwaysOutputData": false,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "NWdp6Ncyq88phNZd",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "sublime-apple",
+          "mode": "list",
+          "cachedResultName": "sublime-apple"
+        },
+        "options": {
+          "pineconeNamespace": "gagan-n8n-rag"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.2,
+      "position": [
+        440,
+        0
+      ],
+      "id": "13dce1ac-6030-4f0e-a926-a71822af6668",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "59h87kB5SX0kb9MO",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        340,
+        220
+      ],
+      "id": "a8026723-eea6-45cb-b32e-45e3612eae9d",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "ae9YDSGGMxrCd01F",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        580,
+        220
+      ],
+      "id": "964219d4-fe68-474f-954d-d140aea4f199",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        500,
+        400
+      ],
+      "id": "b1b55f01-760d-4cfb-bc5b-a93ef072a54b",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi there! 👋\nMy name is Gagan. How can I assist you today?",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        120,
+        560
+      ],
+      "id": "a3fa699b-e52e-4d71-9d7a-7e268199b5e9",
+      "name": "When chat message received",
+      "webhookId": "a13a4ae4-ca43-4346-9357-1a865b0c7c8f"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a professional, friendly, and helpful customer support agent for. When a user asks a question, you job is to:\n\nUnderstand the user's intent clearly b analyzing the question.\n\nRetrieve relevant document or knowledge from the RAG tool to gather factual, up-to-date, and accurate information.\n\nGenerate a concise, clear and friendly response based only on the retrieved information and any known policies.\n\nIf the answer is not available or uncertain, admit it honestly and offer to escalate or follow up.\n\nAlways maintain a polite and empathetic tone. If the user is frustrated, acknowledge their concern and reassure them you're here to help.\n\nIf multiple pieces of information are retrieved, prioritize based on relevance and recency.\n\nDo not hallucinate answers. Only respond with what's retrieved or well-known facts.\n\nUse the structure in your response:\n\nShort summary/answer\n\nHelpful detail or example if needed\n\nOptional next step, link or escalation info\n\nCollect User Context from the vector Database tool attached."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        340,
+        560
+      ],
+      "id": "dbe29cff-ca57-48b3-baec-f811ab29df9d",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        260,
+        760
+      ],
+      "id": "2e82e239-dc41-4008-991c-1e4c05f7aed7",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "msndymduSphCwG44",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        400,
+        760
+      ],
+      "id": "34f03043-7ab2-4711-af1e-5630cdee40d6",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "description": "Use this tool to answer users question"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1.1,
+      "position": [
+        540,
+        760
+      ],
+      "id": "c612f960-4fb7-4ba6-8c13-59372c0aca32",
+      "name": "Answer questions with a vector store"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        820,
+        960
+      ],
+      "id": "b3f9a781-4a42-485d-b65a-7ec31f8584f0",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "msndymduSphCwG44",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "sublime-apple",
+          "mode": "list",
+          "cachedResultName": "sublime-apple"
+        },
+        "options": {
+          "pineconeNamespace": "gagan-n8n-rag"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.2,
+      "position": [
+        460,
+        960
+      ],
+      "id": "2d3e5489-6aa9-4a7b-b4b1-5c65c5b1d6f7",
+      "name": "Pinecone Vector Store1",
+      "credentials": {
+        "pineconeApi": {
+          "id": "59h87kB5SX0kb9MO",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        480,
+        1120
+      ],
+      "id": "ad03851a-4dc3-4f63-89ec-890b24d3f51c",
+      "name": "Embeddings OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "ae9YDSGGMxrCd01F",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer questions with a vector store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store1": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8ec2e5f9-6eab-4361-98bc-06e71d29b2b0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5147df77e3a456317560abb3da1f70ad2f8d175048028792a8403d35c08ea2d8"
+  },
+  "id": "JeJrvy8eu0kh9rqO",
+  "tags": []
+}
