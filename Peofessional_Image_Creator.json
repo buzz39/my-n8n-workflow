@@ -1,0 +1,307 @@
+{
+  "name": "Peofessional Image Creator",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "={{ $json.chatInput }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "0ad24d03-bc9b-4bc1-9cec-b31a89623642",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/upload/v1beta/files?key=AIzaSyDlIblcegBGOyZqDwDiSiaPPzHKB5reqGU",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Goog-Upload-Command",
+              "value": "start,upload,finalize"
+            },
+            {
+              "name": "X-Goog-Upload-Header-Content-Length",
+              "value": "=123"
+            },
+            {
+              "name": "X-Goog-Upload-Header-Content-Type",
+              "value": "image/png"
+            },
+            {
+              "name": "Content-Type",
+              "value": "image/png"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "=data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        0
+      ],
+      "id": "a13bc9e0-50c6-4a63-9af6-bbb661acb081",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "content": "**Get an Image**",
+        "height": 240,
+        "width": 760
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -80,
+        -60
+      ],
+      "typeVersion": 1,
+      "id": "2d169dc7-465a-4d71-9102-7651de4d447f",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "566525d3-c13b-48a1-8774-86c2776a67f3",
+      "name": "When chat message received",
+      "webhookId": "f0afe222-9254-4ca4-a973-bd5c91109b95"
+    },
+    {
+      "parameters": {
+        "content": "**Create a prompt**",
+        "height": 200,
+        "width": 660,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        640,
+        200
+      ],
+      "typeVersion": 1,
+      "id": "0b6025f3-2576-49aa-952c-1c72c84c61df",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "text": "Briefly explain what this image is about in under 5 words.",
+        "imageUrls": "={{ $('When chat message received').item.json.chatInput }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        700,
+        240
+      ],
+      "id": "add9222d-0392-47eb-b046-bd4a17f746cc",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "ae9YDSGGMxrCd01F",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Create a short prompt for an AI image generator that will be fed a photo of a product, to ultimately have professional product photography.\n\nCreate a professional product photograph of this \\[PRODUCT] showcased in a realistic, well-styled interior setting. Position this \\[PRODUCT] in its natural placement — mounted on the ceiling — with the light turned on to highlight its glow, material finish, and design details. Use soft, diffused ambient lighting combined with the emitted light from this \\[PRODUCT] to create balanced highlights and natural shadows across the scene. Capture the shot from the most flattering angle to emphasize shape, texture, and brightness. Ensure colors are rich, true to life, and harmonious with the room’s décor. Add a subtle cinematic grain for a polished, editorial-quality finish.\n",
+              "role": "system"
+            },
+            {
+              "content": "=Description of the product:  {{ $json.content }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        920,
+        240
+      ],
+      "id": "67dcb36e-764b-4d9a-a579-7ef814d9effd",
+      "name": "OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "ae9YDSGGMxrCd01F",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "**Create Image**",
+        "height": 220,
+        "width": 400,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1220,
+        -40
+      ],
+      "typeVersion": 1,
+      "id": "d3b57857-7d9c-4f65-9910-319ad9872dbf",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=AIzaSyDlIblcegBGOyZqDwDiSiaPPzHKB5reqGU",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"contents\": [\n        {\n            \"role\": \"user\",\n            \"parts\": [\n                {\n                    \"fileData\": {\n                        \"fileUri\": \"{{ $('HTTP Request1').item.json.file.uri }}\",\n                        \"mimeType\": \"{{ $('HTTP Request1').item.json.file.mimeType }}\"\n                    }\n                },\n                {\n                    \"text\": \"{{ $json.message.content }}\"\n                }\n            ]\n        }\n    ],\n    \"generationConfig\": {\n        \"temperature\": 1.4,\n        \"topK\": 40,\n        \"topP\": 0.95,\n        \"maxOutputTokens\": 8192,\n        \"responseModalities\": [\"Text\", \"Image\"]\n    }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1280,
+        20
+      ],
+      "id": "825a9811-1557-4652-92fd-bdf98f896e27",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "candidates[0].content.parts[0].inlineData.data",
+        "binaryPropertyName": "outputImage",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1500,
+        20
+      ],
+      "id": "53a3ee38-f716-48a5-952a-2037feed603e",
+      "name": "Convert to File"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "OpenAI1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1edc634d-9a1f-4800-8f6a-fbe091376c5c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5147df77e3a456317560abb3da1f70ad2f8d175048028792a8403d35c08ea2d8"
+  },
+  "id": "I2My9b8wrOKLRTCu",
+  "tags": []
+}
